@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anne &amp; Jesse — Share Your Wedding Memories</title>
+  <meta name="description" content="Upload your photos and videos from Anne &amp; Jesse's wedding directly to our guest album!">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- QRCode library for QR Generator tab -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Canvas Confetti for celebration effects -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-glow"></div>
+  
+  <header class="wedding-header">
+    <p class="wedding-date-top">— 09.12.2026 —</p>
+    <h1 class="couple-title">Anne <span class="ampersand">&amp;</span> Jesse</h1>
+    <p class="wedding-subtag">Share Your Memories • Bay Area, California</p>
+    
+    <nav class="nav-tabs">
+      <button class="tab-btn active" id="tab-upload-btn" onclick="switchTab('upload')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Photos &amp; Videos
+      </button>
+      <button class="tab-btn" id="tab-qr-btn" onclick="switchTab('qr')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        QR Code &amp; Table Cards
+      </button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- UPLOAD TAB -->
+    <section id="tab-upload" class="tab-content active">
+      <div class="card glass-card">
+        <div class="card-header">
+          <h2>Capture &amp; Upload Memories</h2>
+          <p>Help us relive our special day! Tap below to snap a photo directly with your camera or pick photos from your library.</p>
+        </div>
+
+        <div class="guest-info-grid">
+          <div class="input-group">
+            <label for="guest-name">Your Name</label>
+            <input type="text" id="guest-name" placeholder="e.g. Aunt Maria or Cousin Sam">
+          </div>
+          <div class="input-group">
+            <label for="guest-message">Warm Wishes / Note for the Couple</label>
+            <input type="text" id="guest-message" placeholder="e.g. Wishing you both a lifetime of happiness!">
+          </div>
+        </div>
+
+        <!-- Dropzone -->
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" multiple accept="image/*,video/*">
+          <div class="dropzone-content">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <h3>Tap here or drag &amp; drop media</h3>
+            <p class="subtitle">Supports High-Res Photos (JPG, PNG, HEIC) &amp; Videos (MP4, MOV)</p>
+            
+            <div class="button-row mt-3">
+              <button type="button" class="btn btn-primary" onclick="openCameraModal()">
+                📷 Snap Live Photo
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+                🖼️ Choose from Gallery
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Files Queue -->
+        <div id="file-queue-section" class="queue-section hidden">
+          <div class="queue-header">
+            <h4>Selected Media (<span id="file-count">0</span>)</h4>
+            <button class="btn-text danger" onclick="clearQueue()">Clear All</button>
+          </div>
+          <div id="file-preview-grid" class="preview-grid"></div>
+
+          <div class="upload-actions">
+            <button id="upload-btn" class="btn btn-primary btn-large" onclick="startUpload()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload to Couple's Album
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Card -->
+        <div id="progress-container" class="progress-container hidden">
+          <div class="progress-info">
+            <span id="progress-status">Uploading photos to Google Drive...</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Success Container -->
+        <div id="success-banner" class="success-banner hidden">
+          <div class="success-icon">🎉</div>
+          <h3>Thank You So Much!</h3>
+          <p>Your photos and videos have been saved directly to Anne &amp; Jesse's private Google Drive album.</p>
+          <button class="btn btn-secondary mt-3" onclick="resetUploadForm()">Upload More Photos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QR CODE GENERATOR TAB -->
+    <section id="tab-qr" class="tab-content hidden">
+      <div class="card glass-card">
+        <div class="card-header">
+          <h2>Generate Wedding Reception QR Code</h2>
+          <p>Print this QR code on reception table cards, signs, or napkins so your guests can scan and instantly upload photos from their phones!</p>
+        </div>
+
+        <div class="qr-layout">
+          <div class="qr-preview-box">
+            <div class="reception-card-mockup" id="printable-card">
+              <div class="card-border">
+                <span class="champagne-leaf">🌿</span>
+                <h3 class="card-couple">Anne <span class="ampersand">&amp;</span> Jesse</h3>
+                <p class="card-subtitle">Help Us Capture The Night!</p>
+                <div id="qrcode-container"></div>
+                <p class="card-instruction">Scan with your phone camera to share your photos &amp; videos</p>
+                <p class="card-hashtag">#AnneAndJesse2026</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="qr-controls">
+            <div class="input-group">
+              <label for="website-url-input">Website URL (Where this page is hosted):</label>
+              <input type="url" id="website-url-input" value="https://anne-and-jesse-wedding.vercel.app" placeholder="https://your-wedding-site.com">
+            </div>
+
+            <div class="input-group">
+              <label for="hashtag-input">Table Card Hashtag / Subtitle:</label>
+              <input type="text" id="hashtag-input" value="#AnneAndJesse2026" oninput="updateCardText()">
+            </div>
+
+            <div class="button-group">
+              <button class="btn btn-primary" onclick="downloadQRCode()">
+                ⬇️ Download High-Res QR Code (PNG)
+              </button>
+              <button class="btn btn-secondary" onclick="window.print()">
+                🖨️ Print Reception Table Card
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- LIVE CAMERA MODAL -->
+  <div id="camera-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📷 Take Photo</h3>
+        <button class="close-btn" onclick="closeCameraModal()">&times;</button>
+      </div>
+      <div class="camera-viewport">
+        <video id="camera-video" autoplay playsinline></video>
+        <canvas id="camera-canvas" class="hidden"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="switchCamera()">🔄 Flip Camera</button>
+        <button class="shutter-btn" onclick="takeCameraSnapshot()" title="Take Snapshot"></button>
+        <button class="btn btn-outline btn-sm" onclick="closeCameraModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="wedding-footer">
+    <p>Made with ❤️ for Anne &amp; Jesse's Special Day</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
